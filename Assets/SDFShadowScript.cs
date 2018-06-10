@@ -27,34 +27,23 @@ public class SDFShadowScript : MonoBehaviour
 	//所以现在的任务是求出从四个顶点射向屏幕的方向，传递给vs。
 	private Matrix4x4 GetCameraConer(Camera cam)
 	{
-
-		float camFov = cam.fieldOfView;
-		float camAspect = cam.aspect;
-
-
 		Matrix4x4 cornersStore = Matrix4x4.identity;
 
+		Transform camtr = cam.transform;
+		Vector3[] frustumCorners = new Vector3[4];
+        cam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), cam.farClipPlane, cam.stereoActiveEye, frustumCorners);
+        var bottomLeft = camtr.TransformVector(frustumCorners[0]);
+        var topLeft = camtr.TransformVector(frustumCorners[1]);
+        var topRight = camtr.TransformVector(frustumCorners[2]);
+        var bottomRight = camtr.TransformVector(frustumCorners[3]);
 
-		float fovHalf = camFov * .5f;
+        Matrix4x4 frustumCornersArray = Matrix4x4.identity;
+        frustumCornersArray.SetRow(0, bottomLeft);
+        frustumCornersArray.SetRow(1, bottomRight);
+        frustumCornersArray.SetRow(2, topLeft);
+        frustumCornersArray.SetRow(3, topRight);
+		return frustumCornersArray;
 
-
-		float tan_fov = Mathf.Tan(fovHalf * Mathf.Deg2Rad);
-
-		Vector3 toRight = Vector3.right * tan_fov * camAspect;
-
-		Vector3 toTop = Vector3.up * tan_fov;
-
-		Vector3 topLeft = (-Vector3.forward - toRight + toTop);
-		Vector3 topRight = (-Vector3.forward + toRight + toTop);
-		Vector3 bottomRight = (-Vector3.forward + toRight - toTop);
-		Vector3 bottomLeft = (-Vector3.forward - toRight - toTop);
-
-		cornersStore.SetRow(0, topLeft);
-		cornersStore.SetRow(1, topRight);
-		cornersStore.SetRow(2, bottomRight);
-		cornersStore.SetRow(3, bottomLeft);
-
-		return cornersStore;
 	}
 
 
@@ -71,58 +60,11 @@ public class SDFShadowScript : MonoBehaviour
 		EffectMat.SetMatrix("_Corners", GetCameraConer(this.CurCam));
 		EffectMat.SetMatrix("_CamInvViewMatrix", this.CurCam.cameraToWorldMatrix);
 		EffectMat.SetVector("_CamPosition", this.CurCam.transform.position);
-		Debug.LogError("rotation" + this.lightDir.rotation.ToString());
-		Debug.LogError("rotation_f" +  this.lightDir.forward);
 		EffectMat.SetVector("_LightDir", this.lightDir.forward);
 		EffectMat.SetVector("_LightPos", this.lightDir.position);
 
-		this.ModifiedGraphicsBlit(source, destination, EffectMat, 0);
+		Graphics.Blit(source, destination, EffectMat, 0);
 	}
-
-
-    /// <summary>
-    /// 为了将射线的index传入vs中。
-    /// </summary>
-    /// <param name="src">Source.</param>
-    /// <param name="dest">Destination.</param>
-    /// <param name="material">Material.</param>
-    /// <param name="pass">Pass.</param>
-	private void ModifiedGraphicsBlit(RenderTexture src, RenderTexture dest, Material material, int pass)
-	{
-		RenderTexture.active = dest;
-
-		material.SetTexture("_MainTex", src);
-    
-		GL.PushMatrix();
-		GL.LoadOrtho();
-
-		material.SetPass(pass);
-
-
-		GL.Begin(GL.QUADS);
-
-		GL.MultiTexCoord2(0, 0f, 0f);
-		GL.Vertex3(0f, 0f, 3f);
-        
-
-		GL.MultiTexCoord2(0, 1f, 0f);
-        GL.Vertex3(1f, 0f, 2f);
-
-
-		GL.MultiTexCoord2(0, 1f, 1f);
-        GL.Vertex3(1f, 1f, 1f);
-
-
-		GL.MultiTexCoord2(0, 0f, 1f);
-        GL.Vertex3(0f, 1f, 0f);
-
-
-		GL.End();
-		GL.PopMatrix();
-        
-	}
-
-
 
 
 	#region Property

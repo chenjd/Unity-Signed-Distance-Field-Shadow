@@ -167,9 +167,8 @@
 
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
+                index = v.uv.x + (2 * o.uv.y);
                 o.ray = _Corners[index].xyz;
-
-                o.ray = mul(_CamInvViewMatrix, o.ray);
 
 				return o;
 			}
