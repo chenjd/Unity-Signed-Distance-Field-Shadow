@@ -58,7 +58,6 @@ public class SDFShadowScript : MonoBehaviour
 		}
 
 		EffectMat.SetMatrix("_Corners", GetCameraConer(this.CurCam));
-		EffectMat.SetMatrix("_CamInvViewMatrix", this.CurCam.cameraToWorldMatrix);
 		EffectMat.SetVector("_CamPosition", this.CurCam.transform.position);
 		EffectMat.SetVector("_LightDir", this.lightDir.forward);
 		EffectMat.SetVector("_LightPos", this.lightDir.position);

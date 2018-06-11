@@ -23,8 +23,6 @@
 
             float4 _MainTex_TexelSize;
 
-            float4x4 _CamInvViewMatrix;
-
             float3 _CamPosition;
 
 
