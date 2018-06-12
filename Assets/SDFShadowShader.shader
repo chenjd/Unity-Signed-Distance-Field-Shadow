@@ -64,15 +64,15 @@
 
             float map(float3 rp)
             {
-                float4 d;
-                float4 sp = float4( float3(0.68, 0.9, 0.40), sdSphere(rp, float3(1.0,0.0,0.0), 1.0) );
-                float4 sp2 = float4( float3(0.68, 0.1, 0.40), sdSphere(rp, float3(1.0,2.0,0.0), 1.0) );
-                float4 cb = float4( float3(0.17,0.46,1.0), sdCube(rp+float3(2.1,-1.0,0.0), float3(2.0,2.0, 2.0), 0.0) );
-                float4 py = float4( float3(0.7,0.35,0.1), sdPlane(rp.y) );
-                d = (sp.a < py.a) ? sp : py;
-                d = (d.a < sp2.a) ? d : sp2;
-                d = (d.a < cb.a) ? d : cb;
-                return d.a;
+                float ret;
+                float sp = sdSphere(rp, float3(1.0,0.0,0.0), 1.0);
+                float sp2 = sdSphere(rp, float3(1.0,2.0,0.0), 1.0);
+                float cb = sdCube(rp+float3(2.1,-1.0,0.0), float3(2.0,2.0, 2.0), 0.0);
+                float py = sdPlane(rp.y);
+                ret = (sp < py) ? sp : py;
+                ret = (ret < sp2) ? ret : sp2;
+                ret = (ret < cb) ? ret : cb;
+                return ret;
             }
 
 
@@ -143,12 +143,12 @@
             //计算法线
             float3 calcNorm(float3 p)
             {
-                float2 eps = float2(0.001, 0.0);
+                float eps = 0.001;
 
                 float3 norm = float3(
-                map(p + eps.xyy).x - map(p - eps.xyy).x,
-                map(p + eps.yxy).x - map(p - eps.yxy).x,
-                map(p + eps.yyx).x - map(p - eps.yyx).x
+                    map(p + float3(eps, 0, 0)) - map(p - float3(eps, 0, 0)),
+                    map(p + float3(0, eps, 0)) - map(p - float3(0, eps, 0)),
+                    map(p + float3(0, 0, eps)) - map(p - float3(0, 0, eps))
                 );
 
                 return normalize(norm);
